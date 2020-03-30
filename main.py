@@ -192,6 +192,8 @@ async def play(ctx, *args):
 
 def playit():
     try:
+        if (len(gPlaylist)==0):
+            raise Exception('Playlist empty')
         source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(gPlaylist[0]), gVol)
         bot.voice_clients[0].play(source, after = myafter)
         gPlaylist.pop(0)
