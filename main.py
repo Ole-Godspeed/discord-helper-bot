@@ -5,8 +5,10 @@ import os
 import config as cfg
 import aiohttp
 import io
+import asyncio
 
 prefix = cfg.Prefix
+bot = discord.Client()
 bot = commands.Bot(command_prefix=prefix)
 gVol = cfg.DefaultVolume
 gPlaylist = []
@@ -165,9 +167,6 @@ async def play(ctx, *args):
         if len(args) != 0:
             path = path + '/' + args[0]
 
-        if len(args) == 2:
-            random.shuffle(gPlaylist)
-
         if os.path.isdir(path):
             for root, directories, filenames in os.walk(path):
                 for filename in filenames:
@@ -176,15 +175,27 @@ async def play(ctx, *args):
         else:
            gPlaylist.append(path)
 
+        if len(args) == 2:
+            random.shuffle(gPlaylist)
+
         try:
             if not ctx.voice_client.is_playing():
                 source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(gPlaylist[0]), gVol)
-                ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None) # in a galaxy far away Helper-Bot plays the next song - but I'm to stupid for it.
+                ctx.voice_client.play(source, after = myafter)
                 await ctx.send('Now playing: {}'.format(gPlaylist[0][9:]))
                 gPlaylist.pop(0)
 
         except Exception as e:
-            await ctx.send("I need a file from the local filesystem\n" + "Error Code: " + str(e))
+            print(e)
+    except Exception as e:
+        print(e)
+
+def myafter(error):
+    try:
+        source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(gPlaylist[0]), gVol)
+        fut = asyncio.run_coroutine_threadsafe(bot.voice_clients[0].play(source, after = myafter), bot.loop)
+        fut.result()
+        gPlaylist.pop(0)
     except Exception as e:
         print(e)
 
@@ -288,5 +299,33 @@ async def cat(ctx):
                 embed.set_image(url = data['file'])
                 embed.set_footer(text = "http://random.cat/")
                 await ctx.send(embed = embed)
+
+@bot.command()
+async def test(ctx, *args):
+    ''' Testing command - does something... or not '''
+    try:
+        channel = ctx.message.author.voice.channel
+        print(ctx.message.author.voice.channel)
+        print(ctx.voice_client.channel)
+    except Exception as e:
+
+        await ctx.send("You need to be connected to a voice channel for this command.")
+    try:
+        await channel.connect()
+        print('Connected to voice channel.')
+    except Exception as e:
+        print('Already connected to voice channel.')
+        return
+
+    path = 'G:/Musik'
+    if len(args) != 0:
+        path = path + '/' + args[0]
+
+    playlist = []
+
+    for root, directories, filenames in os.walk(path):
+        for filename in filenames:
+            if '.flac' in file_name:
+                playlist.append(os.path.join(root,filename))
 
 bot.run(cfg.BotToken)
