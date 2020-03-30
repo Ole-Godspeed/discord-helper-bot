@@ -210,7 +210,7 @@ async def skip(ctx, *args):
         try:
             ctx.voice_client.stop()
             source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(gPlaylist[0]), gVol)
-            ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
+            ctx.voice_client.play(source, after = myafter)
             await ctx.send('Now playing: {}'.format(gPlaylist[0][9:]))
             gPlaylist.pop(0)
 
