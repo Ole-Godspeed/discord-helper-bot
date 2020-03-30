@@ -190,12 +190,18 @@ async def play(ctx, *args):
     except Exception as e:
         print(e)
 
-def myafter(error):
+def playit():
     try:
         source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(gPlaylist[0]), gVol)
-        fut = asyncio.run_coroutine_threadsafe(bot.voice_clients[0].play(source, after = myafter), bot.loop)
-        fut.result()
+        bot.voice_clients[0].play(source, after = myafter)
         gPlaylist.pop(0)
+    except Exception as e:
+        print(e)
+
+def myafter(error):
+    try:
+        fut = asyncio.run_coroutine_threadsafe(playit(), bot.loop)
+        fut.result()
     except Exception as e:
         print(e)
 
