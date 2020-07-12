@@ -102,6 +102,24 @@ class randoms(commands.Cog):
             return
 
     @commands.command()
+    async def d(self, ctx):
+        ''' Rolls a d20 '''
+        resultString = ''
+
+        try:
+            limit = 20
+
+            number = random.randint(1, limit)
+
+            resultString = str(number)
+
+            await ctx.send("**Result:** " + resultString)
+
+        except Exception as e:
+            print(e)
+            return
+
+    @commands.command()
     async def flip(self, ctx, *args):
         ''' Flip a coin. Default sides are 'head' and 'tails'. '''
         if len(args) < 2:
@@ -170,11 +188,13 @@ class music(commands.Cog):
     @commands.command()
     async def show(self, ctx, *args):
         ''' Shows content of a Folder (pass with "" in case of spaces) '''
-        path = 'G:/Musik'
+        path = cfg.MusicPath
         if len(args) != 0:
             path = path + '/' + args[0]
         try:
-            content = str(os.listdir(path)).strip('[]')
+            content = os.listdir(path)
+            content.sort()
+            content = str(content).strip('[]')
             await ctx.send('Found following stuff in the dir ' + path +':\n' + content)
         except Exception as e:
             await ctx.send('Did not find the folder you wanted to show the content.')
@@ -201,8 +221,9 @@ class music(commands.Cog):
                     for filename in filenames:
                         if '.flac' in filename:
                             gPlaylist.append(os.path.join(root,filename))
+                gPlaylist.sort()
             else:
-               gPlaylist.append(path)
+                gPlaylist.append(path)
 
             if len(args) == 2:
                 random.shuffle(gPlaylist)
@@ -280,7 +301,7 @@ class music(commands.Cog):
                 if ctx.voice_client.is_playing():
                     ctx.voice_client.stop()
 
-                track = "G:/Japan/JBridge/" + tracknr + ".flac"
+                track = "../Japan/JBridge/" + tracknr + ".flac"
 
                 source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(track), gVol)
                 ctx.voice_client.play(source)
@@ -305,7 +326,7 @@ class music(commands.Cog):
                 if ctx.voice_client.is_playing():
                     ctx.voice_client.stop()
 
-                track = "G:/Japan/MinaNoNihongo/" + tracknr + ".flac"
+                track = "../Japan/MinaNoNihongo/" + tracknr + ".flac"
 
                 source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(track), gVol)
                 ctx.voice_client.play(source)
@@ -330,7 +351,7 @@ class music(commands.Cog):
                 if ctx.voice_client.is_playing():
                     ctx.voice_client.stop()
 
-                track = "E:/Hacking/Discord Bot/Nippel/" + track + ".mp3"
+                track = "./Nippel/" + track + ".mp3"
 
                 source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(track), gVol)
                 ctx.voice_client.play(source)
